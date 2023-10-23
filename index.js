@@ -17,19 +17,19 @@ app.get('/', (req, res) => {
 app.listen(3000)
 
 function getCommands() {
-	fs.rmSync('./commands', { recursive: true, force: true });
+	fs.rmSync('commands', { recursive: true, force: true });
 	shell.exec(`git clone ${process.env.REPOSITORY} Athens`);
-	shell.mv('-f', 'Athens/src/commands', 'src/commands');
-	shell.rm('-rf', 'Athens');
+	//shell.mv('-f', 'Athens/commands', 'commands');
+	//shell.rm('-rf', 'Athens');
 }
 
 function setNewCommandsCollection() {
 	client.commands = new Collection();
 
-	const commandFiles = fs.readdirSync('./src/commands').filter(file => file.endsWith('.js'));
+	const commandFiles = fs.readdirSync('commands').filter(file => file.endsWith('.js'));
 
 	for (const file of commandFiles) {
-		const command = require(`./commands/${file}`);
+		const command = require(`commands/${file}`);
 		client.commands.set(command.data.name, command);
 	}
 }
@@ -51,10 +51,10 @@ client.on('interactionCreate', async interaction => {
 		getCommands();
 		
 		const commands = [];
-		const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+		const commandFiles = fs.readdirSync('commands').filter(file => file.endsWith('.js'));
 
 		for (const file of commandFiles) {
-			const newCommand = require(`./commands/${file}`);
+			const newCommand = require(`commands/${file}`);
 			commands.push(newCommand.data.toJSON());
 		}
 
