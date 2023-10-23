@@ -8,6 +8,8 @@ const { Routes } = require('discord-api-types/v10');
 const express = require('express')
 const app = express()
 
+require('dotenv').config();
+
 app.get('/', (req, res) => {
 	res.send('Hello World!')
 })
@@ -16,14 +18,15 @@ app.listen(3000)
 
 function getCommands() {
 	fs.rmSync('./commands', { recursive: true, force: true });
-	shell.cd('./');
-	shell.exec(process.env.COMMANDS);
+	shell.exec(`git clone ${process.env.REPOSITORY} Athens`);
+	shell.mv('-f', 'Athens/src/commands', 'src/commands');
+	shell.rm('-rf', 'Athens');
 }
 
 function setNewCommandsCollection() {
 	client.commands = new Collection();
 
-	const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+	const commandFiles = fs.readdirSync('./src/commands').filter(file => file.endsWith('.js'));
 
 	for (const file of commandFiles) {
 		const command = require(`./commands/${file}`);
@@ -72,7 +75,7 @@ client.on('interactionCreate', async interaction => {
 
 		const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
-		rest.put(Routes.applicationGuildCommands('1132136335466049586', '1130457875303649332'), { body: commands })
+		rest.put(Routes.applicationGuildCommands(process.env.APPLICATION_ID, process.env.GUILD_ID), { body: commands })
 			.catch(console.error);
 
 		setNewCommandsCollection();
@@ -91,5 +94,4 @@ client.on('interactionCreate', async interaction => {
 	}
 });
 
-require('dotenv').config();
 client.login(process.env.TOKEN);
