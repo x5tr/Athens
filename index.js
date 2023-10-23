@@ -19,8 +19,8 @@ app.listen(3000)
 function getCommands() {
 	fs.rmSync('commands', { recursive: true, force: true });
 	shell.exec(`git clone ${process.env.REPOSITORY} Athens`);
-	//shell.mv('-f', 'Athens/commands', 'commands');
-	//shell.rm('-rf', 'Athens');
+	shell.mv('-f', 'Athens/commands', 'commands');
+	shell.rm('-rf', 'Athens');
 }
 
 function setNewCommandsCollection() {
