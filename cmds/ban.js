@@ -14,7 +14,6 @@ module.exports = {
 				.setName('reason')
 				.setDescription('Info about a user')
 				.addStringOption(option => option.setName('reason').setDescription('The reason why you ban the user'))),
-	requiresVote: true,
 	async execute(interaction) {
 		await interaction.reply(`The user is not banned, because idk i forgor :skull:`);
 	},

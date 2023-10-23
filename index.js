@@ -87,48 +87,46 @@ client.on('interactionCreate', async interaction => {
 	if (!command) return;
 
 	try {
-		if (command.requiresVote) {
-			const voteMessage = await interaction.reply({
-				content: `Vote to ${command.name} ${interaction.options.getUser('user').username}`,
+		const voteMessage = await interaction.reply({
+			content: `Vote to ${command.name} ${interaction.options.getUser('user').username}`,
+			components: [
+			  {
+				type: 'ACTION_ROW',
 				components: [
-				  {
-					type: 'ACTION_ROW',
-					components: [
-					  { type: 'BUTTON', style: 'SUCCESS', label: 'Agree', customId: `${command.name}_agree` },
-					  { type: 'BUTTON', style: 'DANGER', label: 'Disagree', customId:`${command.name}_disagree` },
-					],
-				  },
+				  { type: 'BUTTON', style: 'SUCCESS', label: 'Agree', customId: `${command.name}_agree` },
+				  { type: 'BUTTON', style: 'DANGER', label: 'Disagree', customId:`${command.name}_disagree` },
 				],
-				fetchReply:true,
-			  });
+			  },
+			],
+			fetchReply:true,
+		  });
+		
+		  const filter = (buttonInteraction) =>
+			buttonInteraction.customId.startsWith(`${command.name}_`) && buttonInteraction.user.id !== interaction.user.id;
 			
-			  const filter = (buttonInteraction) =>
-				buttonInteraction.customId.startsWith(`${command.name}_`) && buttonInteraction.user.id !== interaction.user.id;
-				
-			   const collector = voteMessage.createMessageComponentCollector({ filter, time :60000 });
-			
-			   let agreeCount = 0;
-			   let disagreeCount = 0;
-			
-			  collector.on('collect', (buttonInteraction) => {
-				if (buttonInteraction.customId === `${command.name}_agree`) {
-				  agreeCount++;
-				} else if (buttonInteraction.customId === `${command.name}_disagree`) {
-				  disagreeCount++;
-				}
-			  });
+		   const collector = voteMessage.createMessageComponentCollector({ filter, time :60000 });
+		
+		   let agreeCount = 0;
+		   let disagreeCount = 0;
+		
+		  collector.on('collect', (buttonInteraction) => {
+			if (buttonInteraction.customId === `${command.name}_agree`) {
+			  agreeCount++;
+			} else if (buttonInteraction.customId === `${command.name}_disagree`) {
+			  disagreeCount++;
+			}
+		  });
 
-			  collector.on('end', async () => {
-				const totalVotes = agreeCount + disagreeCount;
-				
-				if (agreeCount >= Math.ceil(totalVotes / 2)) {
-				  await interaction.followUp(`The vote to ${commandName} ${interaction.options.getUser('user').username} passed.`);
-				  await command.execute(interaction);
-				} else {
-				   await interaction.followUp(`The vote to ${commandName} ${interaction.options.getUser('user').username} failed.`);
-				 }
-			  });
-		}
+		  collector.on('end', async () => {
+			const totalVotes = agreeCount + disagreeCount;
+			
+			if (agreeCount >= Math.ceil(totalVotes / 2)) {
+			  await interaction.followUp(`The vote to ${commandName} ${interaction.options.getUser('user').username} passed.`);
+			  await command.execute(interaction);
+			} else {
+			   await interaction.followUp(`The vote to ${commandName} ${interaction.options.getUser('user').username} failed.`);
+			 }
+		  });
 		await command.execute(interaction);
 	} catch (error) {
 		console.error(error);
